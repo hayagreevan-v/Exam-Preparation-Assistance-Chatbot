@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" name="query">
+    <button id="chat">Chat</button>
+    <button id="back">Back</button>
+    <br>
+    <p></p>
+
+    <script>
+        chatbtn = document.querySelector("#chat");
+        backbtn = document.querySelector("#back");
+        input = document.querySelector("input");
+        p = document.querySelector("p");
+        chatbtn.addEventListener("click",async ()=>{
+            const rawResponse = await fetch(`/chat`, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                method: 'POST',
+                body:`query=${input.value}`
+            });
+            const content = await rawResponse.json();
+            console.log(rawResponse.status);
+            console.log(content);
+            p.innerHTML= content.output;
+        })
+
+        backbtn.addEventListener("click",()=>{
+            window.location.href="/";
+        })
+    </script>
+</body>
+</html>
