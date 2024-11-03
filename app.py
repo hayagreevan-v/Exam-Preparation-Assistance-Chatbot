@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request, redirect, make_response, jsonify
+from flask_cors import CORS 
 from flask import render_template
 from werkzeug.utils import secure_filename
 import os
@@ -13,6 +14,7 @@ from langchain_ollama.llms import OllamaLLM as Ollama
 import json
 
 app = Flask(__name__)
+CORS(app, origins="http://localhost:5173")
 
 CHROMA_PATH = "vectordb"
 
@@ -63,16 +65,13 @@ def clear_files():
 
 @app.route('/chat',methods=['GET','POST'])
 def chat():
-    if request.method=='POST':
-        print(request.form)
-        print(request.form['query'])
-        query = request.form['query']
-        res =  query_llm(query)
-        # print(res)
-        return jsonify({"output":res})
-        # return make_response(res)
-    else:
-        return render_template("chat.html")
+    data = request.json
+    if not data or 'query' not in data:
+        return jsonify({"error": "No query provided"}), 400
+
+    query = data['query']
+    res = query_llm(query)  # Call to your LLM function
+    return jsonify({"output": res})
 
 
 
@@ -118,7 +117,7 @@ def query_llm(query):
     # query = 'What is Blockchain'
 
     # retrieve context - top 5 most relevant chunks to the query vector 
-    # (by default, LangChain uses cosine distance metric)
+        # (by default, LangChain uses cosine distance metric)
     docs_chroma = db_chroma.similarity_search_with_score(query, k=5)
 
     # prepare the retrieved context text for the prompt
@@ -142,7 +141,8 @@ def query_llm(query):
 
 
     # call the Llama 3.2 model using LangChain-Ollama to generate the answer
-    model = Ollama(model="llama3.2:3b")
+    model = Ollama(model="llama3:latest")
+    #model = Ollama(model="llama3.2:3b")
     response_text = model.predict(prompt)
 
     # print the response
