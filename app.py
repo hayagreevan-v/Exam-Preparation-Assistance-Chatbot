@@ -33,7 +33,7 @@ def post():
         print(request.form["id"])
         return "Hi"
     else:
-        return "Hello Worl"
+        return "Hello World"
     
 
 @app.route('/upload', methods=['GET', 'POST'])
