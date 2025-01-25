@@ -7,8 +7,8 @@ import os
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import SentenceTransformerEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM as Ollama
 import json
