@@ -41,7 +41,11 @@ function App() {
             key={index}
             className={`message ${msg.sender === "user" ? "user" : "bot"}`}
           >
-            {msg.text}
+            {(msg.text).split('\n').map((i, ind) => (
+              <div>
+                <p>{i}</p>
+              </div>
+            ))}
           </div>
         ))}
       </div>

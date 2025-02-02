@@ -44,7 +44,7 @@ prompt = prompt_template.format(context=context_text, question=query)
 
 
 # call the Llama 3.2 model using LangChain-Ollama to generate the answer
-model = Ollama(model="llama3.2:1b")
+model = Ollama(model="llama3.2")
 response_text = model.predict(prompt)
 
 # print the response

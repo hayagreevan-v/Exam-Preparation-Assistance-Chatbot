@@ -141,7 +141,7 @@ def query_llm(query):
 
 
     # call the Llama 3.2 model using LangChain-Ollama to generate the answer
-    model = Ollama(model="llama3:latest")
+    model = Ollama(model="llama3.2")
     #model = Ollama(model="llama3.2:3b")
     response_text = model.predict(prompt)
 
