@@ -74,6 +74,12 @@ def chat():
     return jsonify({"output": res})
 
 
+@app.route('/show-files', methods = ['GET'])
+def showFiles():
+    l=[]
+    for f in os.listdir("./upload"):
+        l.append(f)
+    return jsonify(l)
 
 def loadData(DOC_PATH):
     # ----- Data Indexing Process -----
@@ -131,6 +137,7 @@ def query_llm(query):
     Answer the question based on the above context: {question}.
     Provide a detailed answer.
     Don’t justify your answers.
+    If no CONTEXT INFORMATION is given, then give output as No related information found.
     Don’t give information not mentioned in the CONTEXT INFORMATION.
     Do not say "according to the context" or "mentioned in the context" or similar.
     """
