@@ -12,6 +12,8 @@ from langchain.vectorstores import Chroma
 from langchain.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM as Ollama
 import json
+import time
+import torch
 
 app = Flask(__name__)
 CORS(app, origins="http://localhost:5173")
@@ -39,11 +41,15 @@ def post():
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
+        start_time = time.perf_counter()
+
         print(request.files)
         f = request.files['file']
         f.save(f"./upload/{secure_filename(f.filename)}")
         loadData(secure_filename(f.filename))
 
+        end_time = time.perf_counter()
+        print(f"Upload time: {end_time - start_time} seconds")
         return redirect("/")
     else:
         return render_template("upload.html")
@@ -69,8 +75,14 @@ def chat():
     if not data or 'query' not in data:
         return jsonify({"error": "No query provided"}), 400
 
+    start_time = time.perf_counter()
+
     query = data['query']
     res = query_llm(query)  # Call to your LLM function
+
+    end_time = time.perf_counter()
+    print(f"Response time: {end_time - start_time} seconds")
+
     return jsonify({"output": res})
 
 
@@ -81,21 +93,30 @@ def showFiles():
         l.append(f)
     return jsonify(l)
 
+
+print(torch.cuda.is_available())
+# print(torch.cuda.get_device_name(0))
+# split the document into smaller chunks, here with a chunk size of 500
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+# get Sentence-Transformers embedding model
+embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") #model_kwargs = {"device": "cuda"}
+print("\nEmbedding Model Added \n")
+
+# call the Llama 3.2 model using LangChain-Ollama to generate the answer
+model = Ollama(model="llama3.2")
+print("Llama 3.2 model is ready...!")
+
 def loadData(DOC_PATH):
     # ----- Data Indexing Process -----
 
     # load your pdf document
     loader = PyPDFLoader(f"./upload/{DOC_PATH}")
     pages = loader.load()
-    # split the document into smaller chunks, here with a chunk size of 500
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    
     chunks = text_splitter.split_documents(pages)
     print("\n PDF File got chunked \n")
 
-    # get Sentence-Transformers embedding model
-    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-    print("\nEmbedding Model Added \n")
-
+    
     # embed the chunks as vectors and load them into the Chroma database
     try:
         db_chroma = Chroma(collection_name="vectordb",embedding_function=embeddings, persist_directory=CHROMA_PATH)
@@ -108,8 +129,6 @@ def loadData(DOC_PATH):
 
 
 def query_llm(query):
-    # get Sentence-Transformers embedding model
-    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
     db_chroma = Chroma(
         collection_name="vectordb",
@@ -145,10 +164,7 @@ def query_llm(query):
     # load the retrieved context and user query into the prompt template
     prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
     prompt = prompt_template.format(context=context_text, question=query)
-
-
-    # call the Llama 3.2 model using LangChain-Ollama to generate the answer
-    model = Ollama(model="llama3.2")
+    
     #model = Ollama(model="llama3.2:3b")
     response_text = model.predict(prompt)
 
