@@ -69,6 +69,7 @@ def clear_files():
 
     return redirect("/")
 
+chat_history=[]
 @app.route('/chat',methods=['GET','POST'])
 def chat():
     data = request.json
@@ -78,13 +79,22 @@ def chat():
     start_time = time.perf_counter()
 
     query = data['query']
-    res = query_llm(query)  # Call to your LLM function
+    chat_format= stringify(chat_history)
+    print("Chat format: " + chat_format)
+    prompt = f"Previous Conversation:\n{chat_format}\n\nUser: {query}\nBot:"
+    res = query_llm(prompt)  # Call to your LLM function
 
     end_time = time.perf_counter()
     print(f"Response time: {end_time - start_time} seconds")
 
-    return jsonify({"output": res})
+    chat_history.append({"sender": "user", "text": query})
+    chat_history.append({"sender": "bot", "text": res})
+    return jsonify({"chat":chat_history})
 
+@app.route('/clear-chat')
+def clearChat():
+    chat_history = []
+    return jsonify({"chat":chat_history})
 
 @app.route('/show-files', methods = ['GET'])
 def showFiles():
@@ -95,17 +105,17 @@ def showFiles():
 
 
 print(torch.cuda.is_available())
-# print(torch.cuda.get_device_name(0))
+
 # split the document into smaller chunks, here with a chunk size of 500
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 # get Sentence-Transformers embedding model
-embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") #model_kwargs = {"device": "cuda"}
+embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") # model_kwargs = {"device": "cuda"}
 print("\nEmbedding Model Added \n")
 
 # call the Llama 3.2 model using LangChain-Ollama to generate the answer
 model = Ollama(model="llama3.2")
 print("Llama 3.2 model is ready...!")
-
+        
 def loadData(DOC_PATH):
     # ----- Data Indexing Process -----
 
@@ -159,6 +169,9 @@ def query_llm(query):
     If no CONTEXT INFORMATION is given, then give output as No related information found.
     Don’t give information not mentioned in the CONTEXT INFORMATION.
     Do not say "according to the context" or "mentioned in the context" or similar.
+    Try to relate with Previous Conversation mostly on last previous conversation between user and bot.
+    Don't be so dependent on Previous Conversation.
+    Work as Retrieval Augmented Generation Model.
     """
 
     # load the retrieved context and user query into the prompt template
@@ -172,3 +185,11 @@ def query_llm(query):
     print(response_text)
 
     return response_text
+
+def stringify(chat_hist):
+    chat_format = str()
+    for i in chat_hist:
+        # print(i)
+        chat_format+= i["sender"]+": "
+        chat_format+= i["text"]+"\n"
+    return chat_format

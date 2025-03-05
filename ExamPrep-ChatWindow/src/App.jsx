@@ -8,6 +8,10 @@ function App() {
     const [input, setInput] = useState("");
     const [disabled, setDisabled] = useState(false);
   
+    const clearChat = async () =>{
+      const res = await axios.get("http://localhost:5000/clear-chat");
+      setMessages(res.data.chat);
+    }
     // Function to handle message sending
     const sendMessage = async () => {
       if (!input) return;
@@ -26,10 +30,10 @@ function App() {
             { headers: { "Content-Type": "application/json" } }  // Specify JSON format
           );
         console.log(input)
-        const botMessage = { sender: "bot", text: response.data.output };
+        // const botMessage = { sender: "bot", text: response.data.output };
   
         // Update messages with bot response
-        setMessages((prevMessages) => [...prevMessages, botMessage]);
+        setMessages(response.data.chat);
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -64,6 +68,7 @@ function App() {
               disabled={disabled}
             />
             <button onClick={sendMessage} disabled={disabled}>Send</button>
+            <button onClick={clearChat}>Clear chat</button>
           </div>
         </div>
         <div>
