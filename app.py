@@ -72,24 +72,27 @@ def clear_files():
 chat_history=[]
 @app.route('/chat',methods=['GET','POST'])
 def chat():
-    data = request.json
-    if not data or 'query' not in data:
-        return jsonify({"error": "No query provided"}), 400
+    if (request.method == "GET"):
+        return jsonify({"chat":chat_history})
+    if (request.method == "POST"):
+        data = request.json
+        if not data or 'query' not in data:
+            return jsonify({"error": "No query provided"}), 400
 
-    start_time = time.perf_counter()
+        start_time = time.perf_counter()
 
-    query = data['query']
-    chat_format= stringify(chat_history)
-    print("Chat format: " + chat_format)
-    prompt = f"Previous Conversation:\n{chat_format}\n\nUser: {query}\nBot:"
-    res = query_llm(prompt)  # Call to your LLM function
+        query = data['query']
+        chat_format= stringify(chat_history)
+        print("Chat format: " + chat_format)
+        prompt = f"Previous Conversation:\n{chat_format}\n\nUser: {query}\nBot:"
+        res = query_llm(prompt)  # Call to your LLM function
 
-    end_time = time.perf_counter()
-    print(f"Response time: {end_time - start_time} seconds")
+        end_time = time.perf_counter()
+        print(f"Response time: {end_time - start_time} seconds")
 
-    chat_history.append({"sender": "user", "text": query})
-    chat_history.append({"sender": "bot", "text": res})
-    return jsonify({"chat":chat_history})
+        chat_history.append({"sender": "user", "text": query})
+        chat_history.append({"sender": "bot", "text": res})
+        return jsonify({"chat":chat_history})
 
 @app.route('/clear-chat')
 def clearChat():
@@ -165,14 +168,15 @@ def query_llm(query):
     {context}
     Answer the question based on the above context: {question}.
     Provide a detailed answer.
-    Don’t justify your answers.
+    Don't justify your answers.
     If no CONTEXT INFORMATION is given, then give output as No related information found.
-    Don’t give information not mentioned in the CONTEXT INFORMATION.
+    Don't give information not mentioned in the CONTEXT INFORMATION.
     Do not say "according to the context" or "mentioned in the context" or similar.
+    In Previous Conversation, I'm User and You are Bot.
+    Try to maintain the conversation.
     Try to relate with Previous Conversation mostly on last previous conversation between user and bot.
-    Don't be so dependent on Previous Conversation.
-    Work as Retrieval Augmented Generation Model.
     """
+    #   Don't be so dependent on Previous Conversation.
 
     # load the retrieved context and user query into the prompt template
     prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)

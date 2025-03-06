@@ -1,5 +1,7 @@
 .chat-window {
-    width: 100vh;
+    min-width: 1000px;
+    max-width: 1000px;
+    /* width: 80%; */
     height: 99vh;
     border: 1px solid #ddd;
     display: flex;
@@ -15,42 +17,66 @@
   }
   
   .message {
-    padding: 8px;
+    padding: 1px 20px;
     margin: 5px 0;
-    border-radius: 5px;
-    max-width: 80%;
+    border-radius: 10px;
+    max-width: 95%;
+
   }
   
   .user {
     align-self: flex-end;
-    background-color: #dcf8c6;
-    color: blue;
+    background-color: #1f53d6;
+    color: white;
   }
   
   .bot {
     align-self: flex-start;
-    background-color: grey;
-    color : black;
+    background-color: rgb(47, 47, 47);
+    color : white;
   }
   
   .chat-input {
     display: flex;
     border-top: 1px solid #ddd;
-    padding: 5px;
+    padding: 10px;
+    gap: 10px;
   }
   
   .chat-input input {
     flex: 1;
-    padding: 10px;
-    border: none;
+    padding: 10px 20px;
+    border: 1px solid white;
+    border-radius: 8px;
     outline: none;
   }
   
   .chat-input button {
-    padding: 10px;
-    background-color: #4caf50;
-    color: #fff;
+    padding: 0px 10px;
+    border-radius: 6px;
+    height: 35px;
+    background-color: #1f53d6;
+    color: white;
     border: none;
     cursor: pointer;
+    align-self: center;
   }
-  
+
+.file-upload{
+  display: flex;
+  flex-direction: column;
+  padding: auto;
+  margin:20px;
+  border: 1px solid white;
+  justify-content: flex-start;
+  width: 400px;
+}
+.file-upload button{
+  background-color: #1f53d6;
+  width: 40%;
+  height: 30px;
+  padding: 0;
+  margin:10px;
+  border-radius: 5px;
+  align-self: flex-end;
+}

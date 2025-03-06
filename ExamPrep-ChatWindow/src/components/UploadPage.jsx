@@ -39,7 +39,7 @@ export const UploadPage = () =>{
         getData();
     }
     return(
-        <div>
+        <div className="file-upload">
             <h1>File Upload</h1>
                 <input id='uploadFile' type="file" onChange={handleChangeFile} />
                 <button  onClick={handleSubmit}>Upload</button>
