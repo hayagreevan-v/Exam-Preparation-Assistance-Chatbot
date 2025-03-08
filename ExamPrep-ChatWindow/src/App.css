@@ -1,7 +1,4 @@
 .chat-window {
-    min-width: 1000px;
-    max-width: 1000px;
-    /* width: 80%; */
     height: 99vh;
     border: 1px solid #ddd;
     display: flex;
@@ -68,8 +65,10 @@
   padding: auto;
   margin:20px;
   border: 1px solid white;
+  border-radius: 8px;
   justify-content: flex-start;
-  width: 400px;
+  width: 400px
+
 }
 .file-upload button{
   background-color: #1f53d6;
@@ -77,6 +76,20 @@
   height: 30px;
   padding: 0;
   margin:10px;
+  margin-top: 0px;
   border-radius: 5px;
   align-self: flex-end;
+}
+.file-upload h2{
+  text-align: center;
+  margin: 10px 0px;
+  /* border: 1px solid wheat; */
+}
+.file-upload ul{
+  margin-top: 0px;
+  margin-bottom: 20px;
+  /* border: 1px solid wheat; */
+}
+li{
+  margin: 0px;
 }

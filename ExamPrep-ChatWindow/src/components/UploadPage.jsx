@@ -40,19 +40,19 @@ export const UploadPage = () =>{
     }
     return(
         <div className="file-upload">
-            <h1>File Upload</h1>
+            <h2>File Upload</h2>
                 <input id='uploadFile' type="file" onChange={handleChangeFile} />
                 <button  onClick={handleSubmit}>Upload</button>
 
             <br/>
-            <h2 style={{marginLeft:"10px"}}> Uploaded Files</h2>
+            <h2> Uploaded Files</h2>
             <ul>
                 {files.map((f,index)=>(
-                    <li style={{color:'white'}}>{f}</li>
+                    <li key={index} style={{color:'white'}}>{f}</li>
                 ))}
             </ul>
 
-            <button onClick={clearFiles}>Clear Files</button>
+            <button style={{alignSelf:"center"}}onClick={clearFiles}>Clear Files</button>
         </div>
     )
 }

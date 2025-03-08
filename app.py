@@ -1,8 +1,8 @@
-from flask import Flask
-from flask import request, redirect, make_response, jsonify
-from flask_cors import CORS 
-from flask import render_template
-from werkzeug.utils import secure_filename
+from flask import Flask # type: ignore
+from flask import request, redirect, make_response, jsonify, send_file # type: ignore
+from flask_cors import CORS  # type: ignore
+from flask import render_template # type: ignore
+from werkzeug.utils import secure_filename # type: ignore
 import os
 
 from langchain_community.document_loaders import PyPDFLoader
@@ -73,6 +73,7 @@ chat_history=[]
 @app.route('/chat',methods=['GET','POST'])
 def chat():
     if (request.method == "GET"):
+        print(chat_history)
         return jsonify({"chat":chat_history})
     if (request.method == "POST"):
         data = request.json
@@ -84,7 +85,7 @@ def chat():
         query = data['query']
         chat_format= stringify(chat_history)
         print("Chat format: " + chat_format)
-        prompt = f"Previous Conversation:\n{chat_format}\n\nUser: {query}\nBot:"
+        prompt = f"Previous Conversation:\n{chat_format}\n\nCurrent Question: User: {query}\n"
         res = query_llm(prompt)  # Call to your LLM function
 
         end_time = time.perf_counter()
@@ -96,7 +97,8 @@ def chat():
 
 @app.route('/clear-chat')
 def clearChat():
-    chat_history = []
+    chat_history.clear()
+    print(chat_history)
     return jsonify({"chat":chat_history})
 
 @app.route('/show-files', methods = ['GET'])
@@ -105,6 +107,27 @@ def showFiles():
     for f in os.listdir("./upload"):
         l.append(f)
     return jsonify(l)
+
+@app.route("/export-chat")
+def export_chat():
+    f = open("./data/export.json","w")
+    f.write(json.dumps({"chat":chat_history,"files": os.listdir("./upload")}))
+    f.close()
+
+    return send_file("./data/export.json")
+
+@app.route("/import-chat", methods = ["POST"])
+def import_chat():
+    f = request.files['file']
+    f.save(f"./data/{secure_filename("import.json")}")
+
+    f= open("./data/import.json","r")
+    data = f.read()
+    msg = json.loads(data)
+    chat_history.clear()
+    chat_history.extend(msg['chat'])
+
+    return jsonify({"chat":chat_history})
 
 
 print(torch.cuda.is_available())
@@ -146,7 +169,7 @@ def query_llm(query):
     db_chroma = Chroma(
         collection_name="vectordb",
         embedding_function=embeddings,
-        persist_directory=CHROMA_PATH,  # Where to save data locally, remove if not necessary
+        persist_directory=CHROMA_PATH, 
     )
 
     # ----- Retrieval and Generation Process -----
@@ -173,8 +196,8 @@ def query_llm(query):
     Don't give information not mentioned in the CONTEXT INFORMATION.
     Do not say "according to the context" or "mentioned in the context" or similar.
     In Previous Conversation, I'm User and You are Bot.
-    Try to maintain the conversation.
-    Try to relate with Previous Conversation mostly on last previous conversation between user and bot.
+    Try to maintain the Previous conversation.
+    Try to relate with Previous Conversation mostly focus on last conversation between user and bot.
     """
     #   Don't be so dependent on Previous Conversation.
 
@@ -193,7 +216,6 @@ def query_llm(query):
 def stringify(chat_hist):
     chat_format = str()
     for i in chat_hist:
-        # print(i)
         chat_format+= i["sender"]+": "
         chat_format+= i["text"]+"\n"
     return chat_format

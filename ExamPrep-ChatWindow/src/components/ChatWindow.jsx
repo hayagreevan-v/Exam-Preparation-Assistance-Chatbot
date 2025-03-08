@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import '../App.css'
 
-const ChatWindow = () =>{
-    const [messages, setMessages] = useState([]);
+const ChatWindow = ({messages, setMessages}) =>{
+    // const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [disabled, setDisabled] = useState(false);
   
@@ -20,7 +20,6 @@ const ChatWindow = () =>{
       setMessages([...messages, userMessage]);
   
       try {
-        // Call your backend API here (replace `/api/chat` with your endpoint)
         setInput("Loading...");
         setDisabled(true);
         const response = await axios.post(
@@ -40,9 +39,9 @@ const ChatWindow = () =>{
       setInput("");
     };
 
-    useEffect(()=>{
-        axios.get("http://localhost:5000/chat").then((res)=> setMessages(res.data.chat));
-    },[])
+    // useEffect(()=>{
+    //     axios.get("http://localhost:5000/chat").then((res)=> setMessages(res.data.chat));
+    // },[])
 
     return(
         <div className="chat-window">
